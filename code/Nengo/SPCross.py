@@ -5,7 +5,7 @@ import numpy as np
 from Delayy import Del
 
 import pyopencl as cl
-from nengo_ocl.sim_ocl import Simulator
+#from nengo_ocl.sim_ocl import Simulator
 from nengo.tests.helpers import Plotter
 
 import csv
@@ -66,13 +66,13 @@ with model:
     		#print 'simtime', simtime
     		sock.sendto(x_net, (UDP_IP, UDP_PORT))
         
-    output = nengo.Node(send, dimensions=1)
+    output = nengo.Node(send, size_in=1)
     
     
     def dd1 (t,x):
     	return D1.step(x)
     	 
-    delay_MT_MST = nengo.Node(dd1,dimensions=1)
+    delay_MT_MST = nengo.Node(dd1,size_in=1)
       
     '''
     MT = nengo.Ensemble(nengo.Direct(), dimensions=1 , radius = 20)
@@ -95,7 +95,7 @@ with model:
     def dd2 (t,x):
 	   	return D2.step(x)
 	   	
-    delay_FEF_DLPN = nengo.Node(dd2,dimensions=1)
+    delay_FEF_DLPN = nengo.Node(dd2,size_in=1)
    
     Eye = nengo.Ensemble(nengo.Direct(), dimensions=1)
        

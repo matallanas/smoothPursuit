@@ -20,7 +20,11 @@ with model:
   
     MT = nengo.Ensemble(nengo.LIF(1000), dimensions=1 , radius = 20)
     
-    delay_MT_MST = nengo.Node(output = lambda x: D1.step(x[0]))
+    def dd1 (t,x):
+    	return D1.step(x)
+    	 
+    delay_MT_MST = nengo.Node(dd1,size_in=1)
+    #delay_MT_MST = nengo.Node(output = lambda x: D1.step(x))
       
     u = nengo.Ensemble(nengo.LIF(1000), dimensions=1,radius = 20)
     f = nengo.Ensemble(nengo.LIF(2000), dimensions=1,radius = 70)
@@ -29,7 +33,11 @@ with model:
     x2 = nengo.Ensemble(nengo.LIF(2000), dimensions=1,radius = 90)
     Intg = nengo.Ensemble(nengo.LIF(2000), dimensions=1,radius = 20)
 
-    delay_FEF_DLPN = nengo.Node(output = lambda x: D2.step(x[0]))
+    def dd2 (t,x):
+	   	return D2.step(x)
+	   	
+    delay_FEF_DLPN = nengo.Node(dd2,size_in=1)
+    #delay_FEF_DLPN = nengo.Node(output = lambda x: D2.step(x))
    
     Eye = nengo.Ensemble(nengo.Direct(), dimensions=1)
        
@@ -44,7 +52,7 @@ with model:
 
     nengo.Connection(delay_MT_MST, u,filter=.005)
        
-    nengo.Connection(u, f, transform=[[tau/.055]], function=lambda x: kp*(x[0]),filter=tau)
+    nengo.Connection(u, f, transform=[[tau/.055]], function=lambda x: kp*(x),filter=tau)
     nengo.Connection(f, f, transform=[[1-(tau/.055)]], filter=tau)
     
    
@@ -55,17 +63,17 @@ with model:
     pp1 = .03
     pp2 = .01
    
-    nengo.Connection(u, x1, transform=[[tau*pp1*omg*omg]], function=lambda x: 40.0876*(2./(1+np.exp(-0.2174*x[0]))-1), filter=tau)
+    nengo.Connection(u, x1, transform=[[tau*pp1*omg*omg]], function=lambda x: 40.0876*(2./(1+np.exp(-0.2174*x))-1), filter=tau)
 
     nengo.Connection(x1, x1, transform=[[1-tau*omg]], filter=tau)
     nengo.Connection(x2, x1, transform=[[tau*pp1*omg/pp2]], filter=tau)
    
    
-    nengo.Connection(u, x2, transform=[[-tau*pp2*omg*omg]], function=lambda x: 40.0876*(2./(1+np.exp(-0.2174*x[0]))-1), filter=tau)
+    nengo.Connection(u, x2, transform=[[-tau*pp2*omg*omg]], function=lambda x: 40.0876*(2./(1+np.exp(-0.2174*x))-1), filter=tau)
 
     nengo.Connection(x2, x2, transform=[[1-tau*omg]], filter=tau)
    
-    nengo.Connection(x1, delay_FEF_DLPN, transform=[[1/pp1]], function=lambda x: kd*(x[0]))
+    nengo.Connection(x1, delay_FEF_DLPN, transform=[[1/pp1]], function=lambda x: kd*(x))
 
     ####DLPN
        
@@ -97,7 +105,8 @@ sim.run(6)
 
 # Plot the decoded output of the ensemble
 
-t = sim.data(model.t_probe) # Get the time steps
+t = sim.trange() # Get the time steps
+#t = sim.data(model.t_probe) # Get the time steps
 #print t
 plt.plot(t, sim.data(p1), label="Input")
 '''
