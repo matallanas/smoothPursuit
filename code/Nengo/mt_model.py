@@ -26,7 +26,7 @@ class _InputImage(object):
     self.height_k = height_k
     self.width_k = width_k
 
-img = _InputImage(240,320,8,8)
+img = _InputImage(240,320,4,4)
 
 def OclSimulator(network):
   ctx = cl.create_some_context()
@@ -52,27 +52,26 @@ def get_directions():
   return directions
 
 def mt_model(Simulator, nl):
-	mat = io.loadmat('/home/matallanas/Documents/smoothPursuit/LKPYR/flow-vector.mat')
-	speed = mat['Vx']
-	s2 = speed[0:240,0:420]
-	s2 = np.reshape(s2,240*420,1)
-	l  = s2.shape 
-	print l
-	print speed
-    #"""A network that represents sin(t)."""
-    #N = 1000
+  mat = io.loadmat('/home/matallanas/Documents/smoothPursuit/LKPYR/flow-vector.mat')
+  speed = mat['Vx']
+  s2 = speed[0:240,0:320]
+  s2 = np.reshape(s2,240*320,1)
+  l  = s2.shape 
+  print l
+  print speed
+  #"""A network that represents sin(t)."""
+  N = 768000
+  mt = nengo.Network(label='mt_model')
+  with mt:
+    input = nengo.Node(output=s2, dimensions=76800)
+    mt_neurons = nengo.Ensemble(nl(N), radius=20, dimensions=76800)
+    nengo.Connection(input, mt_neurons)
+    in_p = nengo.Probe(input, 'output')
+    mt_p = nengo.Probe(mt_neurons, 'decoded_output', synapse=0.02)
 
-    #mt = nengo.Network(label='mt_model')
-    #with mt:
-	#input = nengo.Node(output= 15)
-        #mt_neurons = nengo.Ensemble(nl(N), 1, radius=20)
-       # nengo.Connection(input, mt_neurons)
-      #  in_p = nengo.Probe(input, 'output')
-     #   mt_p = nengo.Probe(mt_neurons, 'decoded_output', synapse=0.02)
-
-    #sim = Simulator(mt)
-    #sim.run(5.0)
-    #print sim.data[mt_p] 
+  sim = Simulator(mt)
+  sim.run(5.0)
+  print sim.data[mt_p] 
 
     #t = sim.trange()
     #plt.plot(t, sim.data[in_p], label='Input')
@@ -86,9 +85,9 @@ def mt_model(Simulator, nl):
     #logger.debug("[New API] A RMSE: %f", rmse(target, sim.data[A_p]))
     #assert rmse(target, sim.data[in_p]) < 0.001
     #assert rmse(target, sim.data[A_p]) < 0.1
-#mt_model(OclSimulator,nengo.LIF)
+mt_model(OclSimulator,nengo.LIF)
 
-encoders = get_directions()
-print encoders[0]
-print np.nonzero(encoders[0]>0.5)
-print np.nonzero(encoders[1]>0.5)
+#encoders = get_directions()
+#print encoders[0]
+#print np.nonzero(encoders[0]>0.5)
+#print np.nonzero(encoders[1]>0.5)
